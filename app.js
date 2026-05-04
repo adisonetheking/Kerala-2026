@@ -243,7 +243,12 @@ function renderKeyBattles(battles) {
 function renderTable() {
     if (!resultsBody) return;
     const query = searchInput.value.toLowerCase();
-    const displayData = electionData.filter(item => item.name.toLowerCase().includes(query) || item.district.toLowerCase().includes(query) || item.winner.party.toLowerCase().includes(query));
+    const displayData = electionData.filter(item => 
+        item.name.toLowerCase().includes(query) || 
+        item.district.toLowerCase().includes(query) || 
+        item.winner.party.toLowerCase().includes(query) ||
+        item.candidates.some(cand => cand.name.toLowerCase().includes(query))
+    );
     resultsBody.innerHTML = '';
     displayData.forEach(item => {
         const tr = document.createElement('tr');
