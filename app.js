@@ -4,6 +4,7 @@ const UPDATE_INTERVAL = 6000;
 
 let electionData = [];
 let currentFilterAlliance = '';
+let currentFilterDistrict = '';
 let comparisonChart = null;
 
 // DOM Elements
@@ -16,12 +17,12 @@ const ldfBar = document.getElementById('ldfBar');
 const udfBar = document.getElementById('udfBar');
 const ndaBar = document.getElementById('ndaBar');
 const othBar = document.getElementById('othBar');
-const leadingAlliance = document.getElementById('leadingAlliance');
-const lastUpdated = document.getElementById('lastUpdated');
-const searchInput = document.getElementById('searchInput');
-const loader = document.getElementById('loader');
-const dataSourceBadge = document.getElementById('dataSourceBadge');
 const tickerContent = document.getElementById('tickerContent');
+const ldfTrend = document.getElementById('ldfTrend');
+const udfTrend = document.getElementById('udfTrend');
+const ndaTrend = document.getElementById('ndaTrend');
+const othTrend = document.getElementById('othTrend');
+const leadingAlliance = document.getElementById('leadingAlliance');
 
 // Analytics Elements
 const districtGrid = document.getElementById('districtGrid');
@@ -99,7 +100,8 @@ function processData(data) {
             winner: winner,
             runnerUp: runnerUp,
             margin: margin,
-            status: margin > 5000 ? 'Decisive Lead' : 'Close Contest'
+            isDeclared: item.status === 'Result' || item.status === 'Declared' || margin > 50000, // Safety fallback
+            status: item.status || (margin > 5000 ? 'Decisive Lead' : 'Close Contest')
         };
     });
     updateUI();
@@ -114,30 +116,73 @@ function processData(data) {
 }
 
 function updateUI() {
-    const summary = { LDF: 0, UDF: 0, NDA: 0, others: 0 };
+    const summary = { 
+        LDF: { won: 0, leading: 0 }, 
+        UDF: { won: 0, leading: 0 }, 
+        NDA: { won: 0, leading: 0 }, 
+        others: { won: 0, leading: 0 } 
+    };
+
     electionData.forEach(item => {
         const alliance = item.winner.alliance;
-        if (summary[alliance] !== undefined) summary[alliance]++;
-        else summary['others']++;
+        const target = summary[alliance] || summary['others'];
+        if (item.isDeclared) target.won++;
+        else target.leading++;
     });
 
-    if (ldfSeats) ldfSeats.textContent = summary.LDF;
-    if (udfSeats) udfSeats.textContent = summary.UDF;
-    if (ndaSeats) ndaSeats.textContent = summary.NDA;
-    if (othSeats) othSeats.textContent = summary.others;
+    // Update Seat Counts (Total)
+    if (ldfSeats) ldfSeats.textContent = summary.LDF.won + summary.LDF.leading;
+    if (udfSeats) udfSeats.textContent = summary.UDF.won + summary.UDF.leading;
+    if (ndaSeats) ndaSeats.textContent = summary.NDA.won + summary.NDA.leading;
+    if (othSeats) othSeats.textContent = summary.others.won + summary.others.leading;
+
+    // Update Trend/Status Text (Won vs Leading)
+    if (ldfTrend) ldfTrend.textContent = summary.LDF.won > 0 ? `Won: ${summary.LDF.won} | Leading: ${summary.LDF.leading}` : `Leading: ${summary.LDF.leading}`;
+    if (udfTrend) udfTrend.textContent = summary.UDF.won > 0 ? `Won: ${summary.UDF.won} | Leading: ${summary.UDF.leading}` : `Leading: ${summary.UDF.leading}`;
+    if (ndaTrend) ndaTrend.textContent = summary.NDA.won > 0 ? `Won: ${summary.NDA.won} | Leading: ${summary.NDA.leading}` : `Leading: ${summary.NDA.leading}`;
+    if (othTrend) othTrend.textContent = summary.others.won > 0 ? `Won: ${summary.others.won} | Leading: ${summary.others.leading}` : `Leading: ${summary.others.leading}`;
 
     const total = 140;
-    if (ldfBar) ldfBar.style.width = `${(summary.LDF / total) * 100}%`;
-    if (udfBar) udfBar.style.width = `${(summary.UDF / total) * 100}%`;
-    if (ndaBar) ndaBar.style.width = `${(summary.NDA / total) * 100}%`;
-    if (othBar) othBar.style.width = `${(summary.others / total) * 100}%`;
+    const ldfTotal = summary.LDF.won + summary.LDF.leading;
+    const udfTotal = summary.UDF.won + summary.UDF.leading;
+    const ndaTotal = summary.NDA.won + summary.NDA.leading;
+    const othTotal = summary.others.won + summary.others.leading;
 
-    const seatsCounted = summary.LDF + summary.UDF + summary.NDA + summary.others;
+    if (ldfBar) ldfBar.style.width = `${(ldfTotal / total) * 100}%`;
+    if (udfBar) udfBar.style.width = `${(udfTotal / total) * 100}%`;
+    if (ndaBar) ndaBar.style.width = `${(ndaTotal / total) * 100}%`;
+    if (othBar) othBar.style.width = `${(othTotal / total) * 100}%`;
+
+    const seatsCounted = ldfTotal + udfTotal + ndaTotal + othTotal;
     if (seatsCounted > 0) {
-        if (ldfProj) ldfProj.textContent = Math.round((summary.LDF / seatsCounted) * 140);
-        if (udfProj) udfProj.textContent = Math.round((summary.UDF / seatsCounted) * 140);
-        if (ndaProj) ndaProj.textContent = Math.round((summary.NDA / seatsCounted) * 140);
+        if (ldfProj) ldfProj.textContent = Math.round((ldfTotal / seatsCounted) * 140);
+        if (udfProj) udfProj.textContent = Math.round((udfTotal / seatsCounted) * 140);
+        if (ndaProj) ndaProj.textContent = Math.round((ndaTotal / seatsCounted) * 140);
     }
+
+    // Update Majority Tracker Text
+    const allianceCounts = [
+        { name: 'LDF', count: ldfTotal },
+        { name: 'UDF', count: udfTotal },
+        { name: 'NDA', count: ndaTotal }
+    ].sort((a, b) => b.count - a.count);
+
+    if (leadingAlliance) {
+        const top = allianceCounts[0];
+        if (top.count >= 71) {
+            leadingAlliance.textContent = `${top.name} SECURES MAJORITY!`;
+            leadingAlliance.style.color = '#3fb950';
+        } else if (top.count > 0) {
+            leadingAlliance.textContent = `${top.name} IS LEADING`;
+            leadingAlliance.style.color = 'var(--accent-color)';
+        }
+    }
+
+    // Update Trend Indicators (Clear the placeholders)
+    if (ldfTrend) ldfTrend.textContent = summary.LDF > 0 ? "Seats Leading/Won" : "Awaiting...";
+    if (udfTrend) udfTrend.textContent = summary.UDF > 0 ? "Seats Leading/Won" : "Awaiting...";
+    if (ndaTrend) ndaTrend.textContent = summary.NDA > 0 ? "Seats Leading/Won" : "Awaiting...";
+    if (othTrend) othTrend.textContent = summary.others > 0 ? "Seats Leading/Won" : "Awaiting...";
 
     if (lastUpdated) lastUpdated.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
     renderTable();
@@ -212,6 +257,8 @@ function renderDistrictGrid(stats) {
         const leaderCount = sorted[0][1];
         const card = document.createElement('div');
         card.className = 'dist-stat-card';
+        card.onclick = () => filterByDistrict(name);
+        card.style.cursor = 'pointer';
         card.innerHTML = `<span class="dist-stat-name">${name}</span><span class="dist-lead-tag ${leader.toLowerCase()}" style="background: var(--${leader.toLowerCase()}-color, #6e7681); color: white;">${leader}: ${leaderCount}</span>`;
         districtGrid.appendChild(card);
     });
@@ -298,27 +345,40 @@ function openDetails(id) {
 
 function filterByAlliance(alliance) {
     currentFilterAlliance = alliance;
+    currentFilterDistrict = '';
+    renderFilterModal();
+    document.getElementById('filterModalOverlay').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function filterByDistrict(district) {
+    currentFilterDistrict = district;
+    currentFilterAlliance = '';
     renderFilterModal();
     document.getElementById('filterModalOverlay').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 }
 
 function renderFilterModal() {
-    if (!currentFilterAlliance) return;
     const query = (document.getElementById('filterSearchInput')?.value || '').toLowerCase().trim();
+    
+    let wins = [];
+    if (currentFilterAlliance) {
+        wins = electionData.filter(d => d.winner.alliance === currentFilterAlliance);
+        document.getElementById('filterModalTitle').textContent = `${currentFilterAlliance} Leads`;
+    } else if (currentFilterDistrict) {
+        wins = electionData.filter(d => d.district === currentFilterDistrict);
+        document.getElementById('filterModalTitle').textContent = `${currentFilterDistrict} Results`;
+    }
 
-    const wins = electionData
-        .filter(d => d.winner.alliance === currentFilterAlliance)
-        .filter(d =>
-            d.name.toLowerCase().includes(query) ||
-            d.district.toLowerCase().includes(query) ||
-            d.winner.name.toLowerCase().includes(query)
-        )
-        .sort((a, b) => b.margin - a.margin);
+    wins = wins.filter(d => 
+        d.name.toLowerCase().includes(query) || 
+        d.district.toLowerCase().includes(query) || 
+        d.winner.name.toLowerCase().includes(query)
+    ).sort((a,b) => b.margin - a.margin);
 
-    document.getElementById('filterModalTitle').textContent = `${currentFilterAlliance} Leads`;
-    document.getElementById('filterModalSubtitle').textContent = `Total Leads: ${wins.length}`;
-
+    document.getElementById('filterModalSubtitle').textContent = `Total: ${wins.length} seats`;
+    
     const body = document.getElementById('filterResultsBody');
     if (!body) return;
     body.innerHTML = '';
