@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Kerala Election Results 2026</title>
+    <meta name="description" content="Real-time live updates for Kerala Legislative Assembly Election 2026. Track seat leads, constituency results, and party performance.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="dark-theme">
+    <div class="loader-wrapper" id="loader">
+        <div class="loader"></div>
+        <p>Fetching Live Results...</p>
+    </div>
+
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="live-indicator"></span>
+                    <h1>KERALA <span>2026</span></h1>
+                    <p>Assembly Election Live Tracker</p>
+                </div>
+                <div class="header-meta">
+                    <div id="dataSourceBadge" class="status-badge">Checking Source...</div>
+                    <div class="last-updated" id="lastUpdated">
+                        Last updated: Just now
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Summary Dashboard -->
+        <section class="summary-grid">
+            <div class="summary-card ldf">
+                <div class="card-glow"></div>
+                <h3>LDF</h3>
+                <div class="seat-count" id="ldfSeats">0</div>
+                <div class="trend" id="ldfTrend">--</div>
+                <p>Leading/Won</p>
+            </div>
+            <div class="summary-card udf">
+                <div class="card-glow"></div>
+                <h3>UDF</h3>
+                <div class="seat-count" id="udfSeats">0</div>
+                <div class="trend" id="udfTrend">--</div>
+                <p>Leading/Won</p>
+            </div>
+            <div class="summary-card nda">
+                <div class="card-glow"></div>
+                <h3>NDA</h3>
+                <div class="seat-count" id="ndaSeats">0</div>
+                <div class="trend" id="ndaTrend">--</div>
+                <p>Leading/Won</p>
+            </div>
+            <div class="summary-card others">
+                <div class="card-glow"></div>
+                <h3>OTH</h3>
+                <div class="seat-count" id="othSeats">0</div>
+                <div class="trend" id="othTrend">--</div>
+                <p>Leading/Won</p>
+            </div>
+        </section>
+
+        <!-- Progress to Majority -->
+        <section class="majority-tracker card">
+            <div class="majority-header">
+                <span>Majority Mark: 71</span>
+                <span id="leadingAlliance">Calculating Lead...</span>
+            </div>
+            <div class="majority-bar">
+                <div id="ldfBar" class="bar-segment ldf" style="width: 0%"></div>
+                <div id="udfBar" class="bar-segment udf" style="width: 0%"></div>
+                <div id="ndaBar" class="bar-segment nda" style="width: 0%"></div>
+                <div id="othBar" class="bar-segment others" style="width: 0%"></div>
+            </div>
+        </section>
+
+        <!-- Detailed Results -->
+        <section class="results-section">
+            <div class="section-header">
+                <h2>Constituency Tracker</h2>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search Constituency or District...">
+                    <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                </div>
+            </div>
+
+            <div class="table-wrapper card">
+                <table id="constituencyTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Constituency</th>
+                            <th>Leading Candidate</th>
+                            <th>Party</th>
+                            <th>Margin</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                        <!-- Data populated via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Data Source: Election Commission of India / OpenDataKerala. This is a real-time dashboard for educational purposes.</p>
+        </div>
+    </footer>
+
+    <!-- Modal for Detailed Results -->
+    <div id="modalOverlay" class="modal-overlay hidden">
+        <div class="modal-content card">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <h2 id="modalTitle">Constituency Name</h2>
+                    <p id="modalSubtitle">District Name</p>
+                </div>
+                <button id="closeModal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="stats-overview">
+                    <div class="stat-item">
+                        <span class="label">Total Voters</span>
+                        <span class="value" id="totalVoters">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Polling %</span>
+                        <span class="value" id="pollingPercentage">0%</span>
+                    </div>
+                </div>
+                <h3>Candidate-wise Results</h3>
+                <div id="candidateList" class="candidate-list">
+                    <!-- Candidates injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
