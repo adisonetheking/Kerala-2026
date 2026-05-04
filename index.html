@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="dark-theme">
     <div class="loader-wrapper" id="loader">
@@ -17,6 +18,11 @@
     </div>
 
     <header>
+        <div class="live-ticker" id="liveTicker">
+            <div class="ticker-content" id="tickerContent">
+                Fetching latest trends... LDF leading in 40 seats... UDF leading in 99 seats... NDA leading in 1 seat...
+            </div>
+        </div>
         <div class="container">
             <div class="header-content">
                 <div class="logo">
@@ -37,33 +43,37 @@
     <main class="container">
         <!-- Summary Dashboard -->
         <section class="summary-grid">
-            <div class="summary-card ldf">
+            <div class="summary-card ldf" onclick="filterByAlliance('LDF')">
                 <div class="card-glow"></div>
                 <h3>LDF</h3>
                 <div class="seat-count" id="ldfSeats">0</div>
                 <div class="trend" id="ldfTrend">--</div>
                 <p>Leading/Won</p>
+                <div class="view-more">Click to see seats →</div>
             </div>
-            <div class="summary-card udf">
+            <div class="summary-card udf" onclick="filterByAlliance('UDF')">
                 <div class="card-glow"></div>
                 <h3>UDF</h3>
                 <div class="seat-count" id="udfSeats">0</div>
                 <div class="trend" id="udfTrend">--</div>
                 <p>Leading/Won</p>
+                <div class="view-more">Click to see seats →</div>
             </div>
-            <div class="summary-card nda">
+            <div class="summary-card nda" onclick="filterByAlliance('NDA')">
                 <div class="card-glow"></div>
                 <h3>NDA</h3>
                 <div class="seat-count" id="ndaSeats">0</div>
                 <div class="trend" id="ndaTrend">--</div>
                 <p>Leading/Won</p>
+                <div class="view-more">Click to see seats →</div>
             </div>
-            <div class="summary-card others">
+            <div class="summary-card others" onclick="filterByAlliance('others')">
                 <div class="card-glow"></div>
                 <h3>OTH</h3>
                 <div class="seat-count" id="othSeats">0</div>
                 <div class="trend" id="othTrend">--</div>
                 <p>Leading/Won</p>
+                <div class="view-more">Click to see seats →</div>
             </div>
         </section>
 
@@ -78,6 +88,62 @@
                 <div id="udfBar" class="bar-segment udf" style="width: 0%"></div>
                 <div id="ndaBar" class="bar-segment nda" style="width: 0%"></div>
                 <div id="othBar" class="bar-segment others" style="width: 0%"></div>
+            </div>
+        </section>
+
+        <!-- Advanced Analytics Section -->
+        <section class="projection-section card">
+            <div class="projection-header">
+                <h3>Live Seat Projection</h3>
+                <span class="live-pulse">REAL-TIME ESTIMATE</span>
+            </div>
+            <div class="projection-grid">
+                <div class="proj-item">
+                    <span class="proj-label">LDF Projected</span>
+                    <span class="proj-value" id="ldfProj">--</span>
+                </div>
+                <div class="proj-item">
+                    <span class="proj-label">UDF Projected</span>
+                    <span class="proj-value" id="udfProj">--</span>
+                </div>
+                <div class="proj-item">
+                    <span class="proj-label">NDA Projected</span>
+                    <span class="proj-value" id="ndaProj">--</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="analytics-grid">
+            <!-- Vote Share Chart -->
+            <div class="analytics-card card">
+                <h3>Vote Share vs Seat Share</h3>
+                <div class="chart-container">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Region-wise Analysis -->
+            <div class="analytics-card card">
+                <h3>Regional Performance</h3>
+                <div class="region-stats" id="regionStats">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+            <!-- District Performance -->
+            <div class="analytics-card card">
+                <h3>District-wise Leads</h3>
+                <div class="district-grid" id="districtGrid">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+            <!-- Key Battles -->
+            <div class="analytics-card card">
+                <h3>Key Battles (Narrow Margins)</h3>
+                <div class="key-battles-list" id="keyBattlesList">
+                    <!-- Injected via JS -->
+                </div>
             </div>
         </section>
 
@@ -141,6 +207,38 @@
                 <h3>Candidate-wise Results</h3>
                 <div id="candidateList" class="candidate-list">
                     <!-- Candidates injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Alliance Filtered Results -->
+    <div id="filterModalOverlay" class="modal-overlay hidden">
+        <div class="modal-content card">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <h2 id="filterModalTitle">Alliance Wins</h2>
+                    <p id="filterModalSubtitle">Constituency Wise Leads</p>
+                </div>
+                <button id="closeFilterModal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="filter-search-box">
+                    <input type="text" id="filterSearchInput" placeholder="Search within this alliance...">
+                </div>
+                <div class="table-wrapper">
+                    <table class="filter-table">
+                        <thead>
+                            <tr>
+                                <th>Constituency</th>
+                                <th>Candidate</th>
+                                <th>Margin</th>
+                            </tr>
+                        </thead>
+                        <tbody id="filterResultsBody">
+                            <!-- Injected via JS -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

@@ -40,10 +40,38 @@ h1, h2, h3 {
 
 /* Header */
 header {
-    padding: 2rem 0;
+    padding: 0;
     background: linear-gradient(180deg, rgba(88, 166, 255, 0.05) 0%, transparent 100%);
     border-bottom: 1px solid var(--glass-border);
     margin-bottom: 2rem;
+}
+
+.live-ticker {
+    background: rgba(255, 62, 62, 0.1);
+    border-bottom: 1px solid rgba(255, 62, 62, 0.2);
+    height: 35px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.ticker-content {
+    display: inline-block;
+    padding-left: 100%;
+    animation: ticker 30s linear infinite;
+    color: var(--ldf-color);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+@keyframes ticker {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-100%, 0, 0); }
+}
+
+header .container {
+    padding: 2rem 20px;
 }
 
 .header-content {
@@ -134,17 +162,41 @@ header {
 .summary-card {
     background: var(--card-bg);
     border-radius: 20px;
-    padding: 2rem;
+    padding: 1.8rem;
     text-align: center;
     position: relative;
     overflow: hidden;
     border: 1px solid var(--glass-border);
-    transition: transform 0.3s ease, border-color 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
 }
 
 .summary-card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-8px);
+    border-color: var(--accent-color);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+}
+
+.view-more {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-top: 1rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.summary-card:hover .view-more {
+    opacity: 1;
+}
+
+.filter-table th {
+    font-size: 0.75rem;
+    padding: 0.8rem;
+}
+
+.filter-table td {
+    padding: 0.8rem;
+    font-size: 0.85rem;
 }
 
 .summary-card h3 {
@@ -185,7 +237,212 @@ header {
 .nda .seat-count { color: var(--nda-color); }
 .others .seat-count { color: var(--oth-color); }
 
-/* Majority Tracker */
+/* Projection */
+.projection-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(90deg, rgba(88, 166, 255, 0.05) 0%, transparent 100%);
+    border: 1px solid var(--accent-color);
+}
+
+.projection-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.live-pulse {
+    font-size: 0.7rem;
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.projection-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.proj-item {
+    text-align: center;
+}
+
+.proj-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.3rem;
+}
+
+.proj-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: white;
+}
+
+/* Region Stats */
+.region-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.region-card {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+}
+
+.region-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: var(--text-secondary);
+}
+
+.region-bar {
+    height: 12px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    display: flex;
+    overflow: hidden;
+}
+
+.region-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+}
+
+/* Analytics Grid */
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.analytics-card {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.analytics-card h3 {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.chart-container {
+    height: 250px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.district-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.8rem;
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.district-grid::-webkit-scrollbar {
+    width: 4px;
+}
+
+.district-grid::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 4px;
+}
+
+.dist-stat-card {
+    padding: 0.8rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.dist-stat-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dist-lead-tag {
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.key-battles-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.battle-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 10px;
+    border-left: 3px solid #ff3e3e;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.battle-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.battle-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.battle-const {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.battle-margin {
+    font-size: 0.75rem;
+    color: #ff3e3e;
+    font-weight: 700;
+}
+
+.battle-candidates {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
 .majority-tracker {
     background: var(--card-bg);
     border-radius: 20px;
@@ -573,4 +830,23 @@ tbody tr {
 
 tbody tr:hover {
     transform: scale(1.01);
+}
+
+.filter-search-box {
+    margin-bottom: 1.5rem;
+}
+
+.filter-search-box input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 0.8rem 1.2rem;
+    color: white;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.filter-search-box input:focus {
+    border-color: var(--accent-color);
 }
