@@ -1,6 +1,6 @@
 const REMOTE_API_URL = 'https://api.opendatakerala.org/api/kla2026/results/all.json';
 const PROXY_API_URL = '/api/election-results';
-const UPDATE_INTERVAL = 60000;
+const UPDATE_INTERVAL = 6000;
 
 let electionData = [];
 let currentFilterAlliance = '';
@@ -64,7 +64,7 @@ function processData(data) {
         const winner = candidates[0];
         const runnerUp = candidates[1] || { votes: 0 };
         const margin = winner.votes - runnerUp.votes;
-        
+
         const north = ['Kasaragod', 'Kannur', 'Wayanad', 'Kozhikode', 'Malappuram', 'Palakkad'];
         const central = ['Thrissur', 'Ernakulam', 'Idukki', 'Kottayam'];
         const region = north.includes(constituency.district) ? 'North' : (central.includes(constituency.district) ? 'Central' : 'South');
@@ -84,13 +84,13 @@ function processData(data) {
         };
     });
     updateUI();
-    
+
     try {
         updateAnalytics();
     } catch (e) {
         console.warn('Analytics failed:', e);
     }
-    
+
     updateTicker();
 }
 
@@ -128,13 +128,13 @@ function updateUI() {
 function updateAnalytics() {
     const voteTotals = { LDF: 0, UDF: 0, NDA: 0, others: 0 };
     const seatTotals = { LDF: 0, UDF: 0, NDA: 0, others: 0 };
-    const regionData = { North: {LDF:0,UDF:0,NDA:0,others:0, total:0}, Central: {LDF:0,UDF:0,NDA:0,others:0, total:0}, South: {LDF:0,UDF:0,NDA:0,others:0, total:0} };
+    const regionData = { North: { LDF: 0, UDF: 0, NDA: 0, others: 0, total: 0 }, Central: { LDF: 0, UDF: 0, NDA: 0, others: 0, total: 0 }, South: { LDF: 0, UDF: 0, NDA: 0, others: 0, total: 0 } };
     const districtStats = {};
 
     electionData.forEach(item => {
         const alliance = item.winner.alliance !== undefined ? item.winner.alliance : 'others';
         seatTotals[alliance]++;
-        
+
         if (!regionData[item.region][alliance]) regionData[item.region][alliance] = 0;
         regionData[item.region][alliance]++;
         regionData[item.region].total++;
@@ -152,7 +152,7 @@ function updateAnalytics() {
     updateComparisonChart(voteTotals, seatTotals);
     renderRegionalStats(regionData);
     renderDistrictGrid(districtStats);
-    
+
     const narrowMargins = [...electionData].sort((a, b) => a.margin - b.margin).slice(0, 5);
     renderKeyBattles(narrowMargins);
 }
@@ -162,8 +162,8 @@ function updateComparisonChart(voteTotals, seatTotals) {
     if (!canvas || typeof Chart === 'undefined') return;
     const ctx = canvas.getContext('2d');
     const totalVotes = Object.values(voteTotals).reduce((a, b) => a + b, 0) || 1;
-    const voteShares = [ (voteTotals.LDF / totalVotes) * 100, (voteTotals.UDF / totalVotes) * 100, (voteTotals.NDA / totalVotes) * 100, (voteTotals.others / totalVotes) * 100 ];
-    const seatShares = [ (seatTotals.LDF / 140) * 100, (seatTotals.UDF / 140) * 100, (seatTotals.NDA / 140) * 100, (seatTotals.others / 140) * 100 ];
+    const voteShares = [(voteTotals.LDF / totalVotes) * 100, (voteTotals.UDF / totalVotes) * 100, (voteTotals.NDA / totalVotes) * 100, (voteTotals.others / totalVotes) * 100];
+    const seatShares = [(seatTotals.LDF / 140) * 100, (seatTotals.UDF / 140) * 100, (seatTotals.NDA / 140) * 100, (seatTotals.others / 140) * 100];
 
     if (comparisonChart) {
         comparisonChart.data.datasets[0].data = voteShares;
@@ -208,9 +208,9 @@ function renderRegionalStats(data) {
         div.innerHTML = `
             <span class="region-name">${name} Kerala (${counts.total} seats)</span>
             <div class="region-bar">
-                <div style="width: ${(counts.LDF/total)*100}%; background: var(--ldf-color);"></div>
-                <div style="width: ${(counts.UDF/total)*100}%; background: var(--udf-color);"></div>
-                <div style="width: ${(counts.NDA/total)*100}%; background: var(--nda-color);"></div>
+                <div style="width: ${(counts.LDF / total) * 100}%; background: var(--ldf-color);"></div>
+                <div style="width: ${(counts.UDF / total) * 100}%; background: var(--udf-color);"></div>
+                <div style="width: ${(counts.NDA / total) * 100}%; background: var(--nda-color);"></div>
             </div>
             <div class="region-labels"><span>LDF: ${counts.LDF}</span><span>UDF: ${counts.UDF}</span><span>NDA: ${counts.NDA}</span></div>
         `;
@@ -265,7 +265,7 @@ function openDetails(id) {
     item.candidates.forEach(cand => {
         const row = document.createElement('div');
         row.className = 'candidate-row';
-        row.innerHTML = `<div class="cand-info"><div><span class="cand-name">${cand.name}</span><span class="cand-party">${cand.party}</span></div><div class="cand-votes">${cand.votes.toLocaleString()}</div></div><div class="vote-bar-bg"><div class="vote-bar-fill ${cand.alliance.toLowerCase()}" style="width: ${(cand.votes/maxVotes)*100}%; background-color: var(--${cand.alliance.toLowerCase()}-color, #6e7681)"></div></div>`;
+        row.innerHTML = `<div class="cand-info"><div><span class="cand-name">${cand.name}</span><span class="cand-party">${cand.party}</span></div><div class="cand-votes">${cand.votes.toLocaleString()}</div></div><div class="vote-bar-bg"><div class="vote-bar-fill ${cand.alliance.toLowerCase()}" style="width: ${(cand.votes / maxVotes) * 100}%; background-color: var(--${cand.alliance.toLowerCase()}-color, #6e7681)"></div></div>`;
         candidateList.appendChild(row);
     });
     modalOverlay.classList.remove('hidden');
@@ -282,23 +282,23 @@ function filterByAlliance(alliance) {
 function renderFilterModal() {
     if (!currentFilterAlliance) return;
     const query = (document.getElementById('filterSearchInput')?.value || '').toLowerCase().trim();
-    
+
     const wins = electionData
         .filter(d => d.winner.alliance === currentFilterAlliance)
-        .filter(d => 
-            d.name.toLowerCase().includes(query) || 
-            d.district.toLowerCase().includes(query) || 
+        .filter(d =>
+            d.name.toLowerCase().includes(query) ||
+            d.district.toLowerCase().includes(query) ||
             d.winner.name.toLowerCase().includes(query)
         )
-        .sort((a,b) => b.margin - a.margin);
+        .sort((a, b) => b.margin - a.margin);
 
     document.getElementById('filterModalTitle').textContent = `${currentFilterAlliance} Leads`;
     document.getElementById('filterModalSubtitle').textContent = `Total Leads: ${wins.length}`;
-    
+
     const body = document.getElementById('filterResultsBody');
     if (!body) return;
     body.innerHTML = '';
-    
+
     if (wins.length === 0) {
         body.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 2rem;">No results found in this alliance</td></tr>';
         return;
@@ -319,7 +319,7 @@ function renderFilterModal() {
 function hideLoader() { if (loader) loader.classList.add('hidden'); }
 function simulateData() {
     const districts = ['Kasaragod', 'Kannur', 'Wayanad', 'Kozhikode', 'Malappuram', 'Palakkad', 'Thrissur', 'Ernakulam', 'Idukki', 'Kottayam', 'Alappuzha', 'Pathanamthitta', 'Kollam', 'Thiruvananthapuram'];
-    
+
     const realConstNames = [
         'Manjeshwar', 'Kasaragod', 'Udma', 'Kanhangad', 'Payyanur', 'Taliparamba', 'Irikkur', 'Azur', 'Kannur', 'Thalassery', 'Dharmadam',
         'Mananthavady', 'Sulthan Bathery', 'Kalpetta', 'Vadakara', 'Kuttiadi', 'Nadapuram', 'Quilandy', 'Perambra', 'Balussery', 'Kozhikode North', 'Kozhikode South',
@@ -335,20 +335,20 @@ function simulateData() {
 
     const mockData = [];
     for (let i = 1; i <= 140; i++) {
-        const alliance = ['LDF','UDF','NDA'][Math.floor(Math.random()*3)];
-        const dist = districts[Math.floor(Math.random()*districts.length)];
-        const cName = realConstNames[i-1] || `Constituency ${i}`;
-        
+        const alliance = ['LDF', 'UDF', 'NDA'][Math.floor(Math.random() * 3)];
+        const dist = districts[Math.floor(Math.random() * districts.length)];
+        const cName = realConstNames[i - 1] || `Constituency ${i}`;
+
         mockData.push({
-            constituency: { 
-                constituency_Number: i, 
-                constituency_Name: cName, 
-                district: dist, 
-                'Voters Total': 200000, 
-                'Polling % (2026)': 75 
+            constituency: {
+                constituency_Number: i,
+                constituency_Name: cName,
+                district: dist,
+                'Voters Total': 200000,
+                'Polling % (2026)': 75
             },
             candidates: [
-                { name: `Candidate ${i} (L)`, alliance: alliance, party: 'Major Party', votes: 85000 }, 
+                { name: `Candidate ${i} (L)`, alliance: alliance, party: 'Major Party', votes: 85000 },
                 { name: `Candidate ${i} (R)`, alliance: 'others', party: 'Independent', votes: 84200 }
             ]
         });
