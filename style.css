@@ -35,7 +35,7 @@ h1, h2, h3 {
 .container {
     max-width: var(--container-width);
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 15px;
 }
 
 /* Header */
@@ -269,8 +269,14 @@ header .container {
 
 .projection-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: 1rem;
+}
+
+.proj-value {
+    font-size: clamp(1.2rem, 5vw, 1.8rem);
+    font-weight: 800;
+    color: white;
 }
 
 .proj-item {
@@ -849,4 +855,93 @@ tbody tr:hover {
 
 .filter-search-box input:focus {
     border-color: var(--accent-color);
+}
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+
+    .logo h1 {
+        font-size: 2rem;
+    }
+
+    .header-meta {
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .summary-card {
+        padding: 1.2rem;
+    }
+
+    .seat-count {
+        font-size: 2rem;
+    }
+
+    .analytics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .projection-grid {
+        gap: 0.5rem;
+    }
+
+    .proj-value {
+        font-size: 1.4rem;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 10px;
+        max-height: 90vh;
+    }
+
+    .stats-overview {
+        grid-template-columns: 1fr;
+    }
+
+    /* Table adjustments */
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #constituencyTable th:nth-child(1),
+    #constituencyTable td:nth-child(1) {
+        display: none; /* Hide # ID on small mobile */
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .logo h1 {
+        font-size: 1.8rem;
+    }
+    
+    .proj-item {
+        padding: 0.5rem;
+        background: rgba(255,255,255,0.02);
+        border-radius: 8px;
+    }
 }

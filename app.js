@@ -365,6 +365,9 @@ function debounce(func, timeout = 300) {
 }
 
 if (searchInput) searchInput.addEventListener('input', debounce(() => renderTable()));
+const filterSearchInput = document.getElementById('filterSearchInput');
+if (filterSearchInput) filterSearchInput.addEventListener('input', () => renderFilterModal());
+
 document.getElementById('closeModal').onclick = () => { modalOverlay.classList.add('hidden'); document.body.style.overflow = ''; };
 document.getElementById('closeFilterModal').onclick = () => { document.getElementById('filterModalOverlay').classList.add('hidden'); document.body.style.overflow = ''; };
 
