@@ -37,6 +37,22 @@ const filterResultsBody = document.getElementById('filterResultsBody');
 const modalOverlay = document.getElementById('modalOverlay');
 const candidateList = document.getElementById('candidateList');
 
+// Party to Alliance Mapping (for robust categorization)
+const ALLIANCE_MAP = {
+    'CPI(M)': 'LDF', 'CPIM': 'LDF', 'CPI': 'LDF', 'KC(M)': 'LDF', 'KCM': 'LDF', 'NCP': 'LDF', 'JD(S)': 'LDF', 'JDS': 'LDF', 'INL': 'LDF',
+    'INC': 'UDF', 'IUML': 'UDF', 'ML': 'UDF', 'KC(J)': 'UDF', 'RSP': 'UDF', 'CMP': 'UDF',
+    'BJP': 'NDA', 'BDJS': 'NDA'
+};
+
+function getAlliance(party, providedAlliance) {
+    if (providedAlliance && providedAlliance !== 'others' && providedAlliance !== '') return providedAlliance.toUpperCase();
+    const upperParty = (party || '').toUpperCase();
+    for (const [key, value] of Object.entries(ALLIANCE_MAP)) {
+        if (upperParty.includes(key.toUpperCase())) return value;
+    }
+    return 'others';
+}
+
 async function fetchData() {
     try {
         const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
@@ -64,6 +80,9 @@ function processData(data) {
         const winner = candidates[0];
         const runnerUp = candidates[1] || { votes: 0 };
         const margin = winner.votes - runnerUp.votes;
+
+        // Ensure alliance is set correctly
+        winner.alliance = getAlliance(winner.party, winner.alliance);
 
         const north = ['Kasaragod', 'Kannur', 'Wayanad', 'Kozhikode', 'Malappuram', 'Palakkad'];
         const central = ['Thrissur', 'Ernakulam', 'Idukki', 'Kottayam'];
@@ -243,9 +262,9 @@ function renderKeyBattles(battles) {
 function renderTable() {
     if (!resultsBody) return;
     const query = searchInput.value.toLowerCase();
-    const displayData = electionData.filter(item => 
-        item.name.toLowerCase().includes(query) || 
-        item.district.toLowerCase().includes(query) || 
+    const displayData = electionData.filter(item =>
+        item.name.toLowerCase().includes(query) ||
+        item.district.toLowerCase().includes(query) ||
         item.winner.party.toLowerCase().includes(query) ||
         item.candidates.some(cand => cand.name.toLowerCase().includes(query))
     );
