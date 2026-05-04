@@ -1,5 +1,6 @@
-const API_URL = 'https://api.opendatakerala.org/api/kla2026/results/all.json';
-const UPDATE_INTERVAL = 60000; // Update every minute
+const REMOTE_API_URL = 'https://api.opendatakerala.org/api/kla2026/results/all.json';
+const PROXY_API_URL = '/api/election-results';
+const UPDATE_INTERVAL = 60000;
 
 let electionData = [];
 
@@ -31,7 +32,12 @@ const closeModal = document.getElementById('closeModal');
 async function fetchData() {
     try {
         console.log('Fetching live data...');
-        const response = await fetch(API_URL);
+        
+        // Use proxy on production (Vercel), direct on localhost
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const targetUrl = isLocal ? REMOTE_API_URL : PROXY_API_URL;
+        
+        const response = await fetch(targetUrl);
         if (!response.ok) throw new Error('Network response was not ok');
         const json = await response.json();
         
@@ -42,6 +48,21 @@ async function fetchData() {
         hideLoader();
     } catch (error) {
         console.error('Fetch error:', error);
+        
+        // Secondary attempt for other network IPs if first one fails
+        if (window.location.hostname !== 'localhost') {
+            try {
+                const altResponse = await fetch(REMOTE_API_URL);
+                if (altResponse.ok) {
+                    const altJson = await altResponse.json();
+                    dataSourceBadge.textContent = 'Live Data';
+                    dataSourceBadge.className = 'status-badge live';
+                    processData(altJson.data);
+                    hideLoader();
+                    return;
+                }
+            } catch (e) {}
+        }
         
         dataSourceBadge.textContent = 'Simulated Mode';
         dataSourceBadge.className = 'status-badge simulated';

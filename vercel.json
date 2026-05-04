@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/election-results",
+      "destination": "https://api.opendatakerala.org/api/kla2026/results/all.json"
+    }
+  ]
+}
